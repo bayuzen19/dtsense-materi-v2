@@ -1,0 +1,13 @@
+# Dependencies utama project RAG OOP FastAPI
+# Kompatibel dengan Python 3.10 - 3.14
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.9.0
+faiss-cpu>=1.9.0
+numpy>=1.26.0,<3.0.0
+pypdf>=5.0.0
+streamlit>=1.38.0
+langchain-groq>=0.3.0
+langchain-core>=0.3.0
+python-dotenv>=1.0.0
+sentence-transformers>=3.0.0
