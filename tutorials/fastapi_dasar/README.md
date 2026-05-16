@@ -1,4 +1,4 @@
-# 🚀 Tutorial FastAPI untuk Pemula (Non-IT Friendly)
+# 🚀 Tutorial FastAPI untuk Pemula
 
 Folder ini berisi materi pengantar FastAPI yang disusun **step-by-step**.
 Jalankan setiap file Python satu per satu dari yang paling kecil nomornya.
