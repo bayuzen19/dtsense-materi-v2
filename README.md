@@ -101,7 +101,301 @@ oop_fastapi/
 
 ---
 
-## 🚀 Cara Menjalankan (Step-by-Step)
+## � Panduan Implementasi Step-by-Step (Urutan Ngoding)
+
+Ikuti urutan ini saat membangun project dari NOL. Setiap langkah membangun
+di atas langkah sebelumnya.
+
+---
+
+### Step 1: Buat folder project dan struktur dasar
+
+```
+mkdir oop_fastapi
+cd oop_fastapi
+mkdir src src/models src/processing src/storage src/retrieval src/pipeline
+mkdir api frontend utils data tutorials notebooks
+```
+
+Kenapa banyak folder? Karena kita memisahkan tanggung jawab:
+- `src/` → semua class OOP (logika utama)
+- `api/` → endpoint HTTP (pintu masuk dari luar)
+- `frontend/` → tampilan web
+- `utils/` → fungsi bantu yang bukan class
+
+---
+
+### Step 2: Buat `src/models/document.py` — Class pertama
+
+**Tujuan**: Belajar membuat class, `__init__`, method, attribute.
+
+```python
+class Document:
+    def __init__(self, title: str, content: str):
+        self.title = title
+        self.content = content
+
+    def word_count(self) -> int:
+        return len(self.content.split())
+
+    def preview(self, max_chars: int = 100) -> str:
+        return self.content[:max_chars] + "..."
+```
+
+**Konsep OOP**: Class = cetakan. Object = hasil cetakan.
+`Document("FastAPI", "...")` → membuat object dari class Document.
+
+---
+
+### Step 3: Buat `src/processing/chunker.py` — Pecah teks
+
+**Tujuan**: Teks panjang dipotong-potong supaya bisa dicari per bagian.
+
+```python
+class TextChunker:
+    def __init__(self, chunk_size: int = 30, overlap: int = 5):
+        self.chunk_size = chunk_size
+        self.overlap = overlap
+
+    def split(self, text: str) -> list[str]:
+        words = text.split()
+        chunks = []
+        start = 0
+        while start < len(words):
+            end = start + self.chunk_size
+            chunk = " ".join(words[start:end])
+            chunks.append(chunk)
+            start += self.chunk_size - self.overlap
+        return chunks
+```
+
+**Konsep OOP**: Attribute (`chunk_size`) menyimpan konfigurasi.
+Method (`split`) melakukan aksi.
+
+---
+
+### Step 4: Buat `src/processing/embedder.py` — Ubah teks jadi angka
+
+**Tujuan**: Komputer tidak bisa membaca teks. Kita ubah teks jadi array angka (vektor).
+
+```python
+class SimpleEmbedder:
+    def __init__(self, dimension: int = 256):
+        self.dimension = dimension
+
+    def embed(self, text: str) -> list[float]:
+        # Setiap kata diubah jadi angka berdasarkan posisi huruf
+        ...
+```
+
+**Konsep OOP**: Encapsulation — detail cara embed disembunyikan di dalam class.
+User cukup panggil `embedder.embed("teks")` tanpa tahu rumus di dalamnya.
+
+---
+
+### Step 5: Buat `src/processing/hf_embedder.py` — Embedding serius
+
+**Tujuan**: Ganti embedding buatan sendiri dengan model AI sungguhan (HuggingFace).
+
+```python
+from sentence_transformers import SentenceTransformer
+
+class HuggingFaceEmbedder:
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+        self.model = SentenceTransformer(model_name)
+        self.dimension = self.model.get_sentence_embedding_dimension()
+
+    def embed(self, text: str) -> list[float]:
+        return self.model.encode(text).tolist()
+```
+
+**Konsep OOP**: Polymorphism — `SimpleEmbedder` dan `HuggingFaceEmbedder` punya
+method `.embed()` yang sama, tapi cara kerjanya berbeda. Bisa ditukar-tukar!
+
+---
+
+### Step 6: Buat `src/storage/vector_store.py` — Simpan & cari vektor
+
+**Tujuan**: Menyimpan semua vektor embedding ke FAISS, lalu mencari yang paling mirip.
+
+```python
+import faiss
+import numpy as np
+
+class FaissVectorStore:
+    def __init__(self, embedder):
+        self.embedder = embedder
+        self.index = faiss.IndexFlatL2(embedder.dimension)
+        self.texts = []
+
+    def add(self, text: str): ...
+    def search(self, query: str, top_k: int = 3) -> list[str]: ...
+```
+
+**Konsep OOP**: Composition — `FaissVectorStore` MEMILIKI `embedder` di dalamnya.
+Satu class memakai class lain. Protocol/Interface memastikan embedder apapun bisa dipakai
+selama punya `.dimension` dan `.embed()`.
+
+---
+
+### Step 7: Buat `src/retrieval/retriever.py` — Cari dokumen relevan
+
+**Tujuan**: Membungkus vector_store.search() supaya lebih mudah dipakai.
+
+```python
+class Retriever:
+    def __init__(self, vector_store):
+        self.vector_store = vector_store
+
+    def retrieve(self, query: str, top_k: int = 3) -> list[str]:
+        return self.vector_store.search(query, top_k)
+```
+
+**Konsep OOP**: Separation of Concerns — setiap class punya SATU tugas.
+Retriever tugasnya HANYA mencari. Tidak tahu cara embed atau simpan.
+
+---
+
+### Step 8: Buat `src/retrieval/llm_generator.py` — Jawab pakai AI
+
+**Tujuan**: Ambil potongan teks yang relevan, kirim ke LLM, dapat jawaban lengkap.
+
+```python
+from langchain_groq import ChatGroq
+
+class LLMGenerator:
+    def __init__(self, model_name: str = "llama-3.3-70b-versatile"):
+        self.llm = ChatGroq(model_name=model_name)
+
+    def generate(self, query: str, contexts: list[str]) -> str:
+        # Gabung konteks + pertanyaan → kirim ke LLM → dapat jawaban
+        ...
+```
+
+**Konsep OOP**: Class ini bertanggung jawab HANYA untuk generate jawaban.
+Tidak tahu cara cari dokumen. Terima beres dari Retriever.
+
+---
+
+### Step 9: Buat `src/pipeline/rag_pipeline.py` — Gabungkan semuanya
+
+**Tujuan**: Satu class yang mengorkestrasikan seluruh alur dari A-Z.
+
+```python
+class RAGPipeline:
+    def __init__(self, ...):
+        self.chunker = TextChunker(...)
+        self.embedder = HuggingFaceEmbedder(...)
+        self.vector_store = FaissVectorStore(self.embedder)
+        self.retriever = Retriever(self.vector_store)
+        self.generator = LLMGenerator(...)
+
+    def add_document(self, title, content): ...
+    def ask(self, question) -> str: ...
+```
+
+**Konsep OOP**: Orchestration Pattern — pipeline merangkai semua class menjadi alur kerja.
+Ini seperti "manajer" yang mendelegasikan tugas ke bawahannya.
+
+Alur: Teks → Chunker → Embedder → VectorStore → Retriever → Generator → Jawaban
+
+---
+
+### Step 10: Buat `api/schemas.py` — Definisikan format data API
+
+**Tujuan**: Tentukan format JSON yang diterima dan dikembalikan oleh API.
+
+```python
+from pydantic import BaseModel
+
+class AskRequest(BaseModel):
+    question: str
+
+class AskResponse(BaseModel):
+    answer: str
+    contexts: list[str]
+```
+
+---
+
+### Step 11: Buat `api/dependencies.py` — Singleton pipeline
+
+**Tujuan**: Buat SATU instance pipeline yang dipakai bersama oleh semua endpoint.
+
+```python
+from src.pipeline.rag_pipeline import RAGPipeline
+
+pipeline = RAGPipeline(use_llm=True, use_simple_embedder=False)
+```
+
+---
+
+### Step 12: Buat `api/main.py` — Endpoint FastAPI
+
+**Tujuan**: Pintu masuk HTTP. Client kirim request → server proses → kirim response.
+
+```python
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.post("/ask")
+def ask(request: AskRequest):
+    answer = pipeline.ask(request.question)
+    return {"answer": answer}
+```
+
+---
+
+### Step 13: Buat `frontend/streamlit_app.py` — Tampilan web
+
+**Tujuan**: UI sederhana dimana user bisa upload PDF dan bertanya.
+Streamlit berkomunikasi dengan FastAPI via HTTP request.
+
+---
+
+### 🗺️ Peta Hubungan Antar File
+
+```
+User bertanya "Apa itu OOP?"
+         │
+         ▼
+┌─────────────────────┐
+│  frontend/          │  ← User klik tombol "Tanya"
+│  streamlit_app.py   │
+└────────┬────────────┘
+         │ HTTP POST /ask
+         ▼
+┌─────────────────────┐
+│  api/main.py        │  ← Terima request, panggil pipeline
+└────────┬────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│  pipeline/          │  ← Orkestrasi semua langkah
+│  rag_pipeline.py    │
+└────────┬────────────┘
+         │
+    ┌────┴─────────────────────────────────┐
+    ▼                                      ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ retriever.py │→ │vector_store  │→ │ hf_embedder  │
+│ (cari)       │  │ (FAISS)      │  │ (teks→angka) │
+└──────────────┘  └──────────────┘  └──────────────┘
+    │
+    ▼
+┌──────────────┐
+│llm_generator │  ← Dapat konteks relevan, generate jawaban
+│ (Groq LLM)   │
+└──────────────┘
+         │
+         ▼
+    "OOP adalah paradigma pemrograman yang menggunakan
+     class dan object untuk mengorganisir kode..."
+```
+
+---
+
+## �🚀 Cara Menjalankan (Step-by-Step)
 
 ### Langkah 1: Buat Virtual Environment
 
