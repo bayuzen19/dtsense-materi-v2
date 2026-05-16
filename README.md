@@ -107,7 +107,128 @@ Ikuti urutan ini saat membangun project dari NOL. Setiap langkah membangun
 di atas langkah sebelumnya.
 
 ---
+### 📌 Konsep Dasar: Function (Fungsi)
 
+Sebelum belajar class, kamu harus paham **function** dulu.
+
+**Function = resep yang bisa dipakai berulang-ulang.**
+
+Bayangkan kamu punya resep "Buat Kopi":
+1. Ambil gelas
+2. Masukkan kopi 2 sendok
+3. Tuang air panas
+4. Aduk
+
+Tanpa function, setiap kali mau buat kopi kamu tulis 4 langkah itu lagi.
+Dengan function, cukup tulis SEKALI, lalu panggil kapanpun mau bikin kopi.
+
+```python
+# TANPA function (capek, nulis berulang):
+print("Halo, Budi! Selamat datang.")
+print("Halo, Siti! Selamat datang.")
+print("Halo, Dedi! Selamat datang.")
+
+# DENGAN function (tulis sekali, pakai berkali-kali):
+def sapa(nama):
+    print(f"Halo, {nama}! Selamat datang.")
+
+sapa("Budi")   # → Halo, Budi! Selamat datang.
+sapa("Siti")   # → Halo, Siti! Selamat datang.
+sapa("Dedi")   # → Halo, Dedi! Selamat datang.
+```
+
+**Anatomi function:**
+```python
+def nama_function(parameter1, parameter2):
+    """Penjelasan singkat fungsi ini ngapain."""
+    # lakukan sesuatu
+    hasil = parameter1 + parameter2
+    return hasil   # ← kembalikan hasilnya
+
+# Panggil:
+jawaban = nama_function(5, 3)   # jawaban = 8
+```
+
+| Bagian | Artinya |
+|--------|---------|
+| `def` | "Saya mau bikin function baru" |
+| `nama_function` | Nama resepnya (terserah kamu) |
+| `(parameter)` | Bahan yang dibutuhkan resep |
+| `return` | Hasil jadinya |
+
+---
+
+### 📌 Konsep Dasar: Class (Kelas)
+
+**Class = cetakan/blueprint untuk membuat sesuatu.**
+
+Bayangkan class itu seperti **formulir kosong**:
+- Formulir "Data Mahasiswa" punya kolom: nama, NIM, jurusan
+- Setiap mahasiswa mengisi formulir itu → jadi **object** (data nyata)
+
+```python
+# CLASS = cetakan/formulir
+class Mahasiswa:
+    def __init__(self, nama, nim, jurusan):
+        # Attribute = kolom-kolom di formulir
+        self.nama = nama
+        self.nim = nim
+        self.jurusan = jurusan
+
+    # Method = aksi yang bisa dilakukan
+    def perkenalan(self):
+        return f"Hai, saya {self.nama} dari {self.jurusan}"
+
+# OBJECT = formulir yang sudah diisi (data nyata)
+budi = Mahasiswa("Budi", "A001", "Informatika")
+siti = Mahasiswa("Siti", "A002", "Data Science")
+
+print(budi.nama)           # → Budi
+print(siti.perkenalan())   # → Hai, saya Siti dari Data Science
+```
+
+**Penjelasan bagian-bagian class:**
+
+| Bagian | Artinya | Analogi |
+|--------|---------|---------|
+| `class Mahasiswa:` | Buat cetakan baru | Buat formulir kosong |
+| `__init__(self, ...)` | Dijalankan saat object dibuat | Saat isi formulir |
+| `self` | Merujuk ke object itu sendiri | "Saya" |
+| `self.nama = nama` | Simpan data ke object | Isi kolom "Nama" |
+| `def perkenalan(self)` | Aksi yang bisa dilakukan object | Kemampuan mahasiswa |
+
+**Perbedaan function biasa vs method (function di dalam class):**
+
+```python
+# Function biasa — berdiri sendiri, tidak punya "pemilik"
+def hitung_luas(panjang, lebar):
+    return panjang * lebar
+
+# Method — milik sebuah class, punya akses ke data object via self
+class Persegi:
+    def __init__(self, sisi):
+        self.sisi = sisi
+
+    def hitung_luas(self):          # ← method
+        return self.sisi * self.sisi  # bisa akses self.sisi
+
+kotak = Persegi(5)
+print(kotak.hitung_luas())  # → 25
+```
+
+**Kenapa pakai class? Kenapa tidak function biasa saja?**
+
+| Situasi | Pakai Function | Pakai Class |
+|---------|---------------|-------------|
+| Hitung 2+3 | ✅ Cukup | Berlebihan |
+| Simpan data mahasiswa + aksi | Ribet | ✅ Rapi |
+| Banyak data + banyak aksi yang saling terkait | Sangat ribet | ✅ Terorganisir |
+| Project besar (seperti ini) | Kacau | ✅ Wajib |
+
+**Intinya**: Class = data + aksi dibungkus jadi satu paket. Kalau cuma perlu aksi tanpa
+menyimpan data, cukup function biasa.
+
+---
 ### Step 1: Buat folder project dan struktur dasar
 
 ```
