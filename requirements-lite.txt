@@ -1,0 +1,19 @@
+# Requirements LITE — untuk laptop yang tidak kuat install sentence-transformers
+# Gunakan ini jika pip install -r requirements.txt gagal
+#
+# Perbedaan: Tidak ada sentence-transformers (dan PyTorch)
+# Pipeline akan otomatis pakai SimpleEmbedder (kurang akurat tapi tetap bisa jalan)
+#
+# Cara pakai:
+#   pip install -r requirements-lite.txt
+
+fastapi>=0.115.0,<1.0.0
+uvicorn>=0.30.0,<1.0.0
+pydantic>=2.9.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+numpy>=1.26.0,<2.0.0
+pypdf>=5.0.0,<6.0.0
+faiss-cpu>=1.7.4,<2.0.0
+langchain-groq>=0.3.0,<1.0.0
+langchain-core>=0.3.0,<1.0.0
+streamlit>=1.38.0,<2.0.0

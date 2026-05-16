@@ -633,3 +633,194 @@ Buka `notebooks/01_oop_rag_fastapi_easy.ipynb` untuk materi interaktif:
 ## 📋 Catatan Penting
 
 - **API Key Groq GRATIS** — daftar di https://console.groq.com
+- **Tidak perlu GPU** — embedding model ringan, bisa di laptop biasa
+- **Tidak perlu Docker** — cukup Python dan pip
+- **Tidak perlu database** — semua disimpan di memori (untuk pembelajaran)
+- Jika tidak punya API key, sistem fallback ke SimpleGenerator (tanpa LLM)
+- File `.env` TIDAK di-push ke GitHub (sudah ada di `.gitignore`)
+
+---
+
+## ❓ FAQ — Error yang Sering Muncul
+
+### 1. `No module named 'xxx'`
+
+**Penyebab**: Library belum terinstall, atau terminal tidak di dalam virtual environment.
+
+**Solusi**:
+```bash
+# Pastikan venv aktif (ada tulisan (venv) di terminal)
+venv\Scripts\activate          # Windows
+source venv/bin/activate       # macOS/Linux
+
+# Install ulang semua library
+pip install -r requirements.txt
+```
+
+> ⚠️ Setiap buka terminal BARU, kamu HARUS ketik `venv\Scripts\activate` lagi!
+> Virtual environment tidak otomatis aktif.
+
+---
+
+### 2. `No wheels for NumPy` / `numpy build failed`
+
+**Penyebab**: Versi Python terlalu baru (3.13/3.14) dan NumPy belum support.
+
+**Solusi**:
+```bash
+# Opsi 1: Install numpy tanpa versi spesifik
+pip install numpy
+
+# Opsi 2 (RECOMMENDED): Pakai Python 3.11
+# Download di https://www.python.org/downloads/release/python-3119/
+# Saat install, CENTANG "Add Python to PATH"
+```
+
+---
+
+### 3. `pip install sentence-transformers` gagal / lama sekali
+
+**Penyebab**: Library ini butuh PyTorch (~2GB). Koneksi lambat atau disk penuh.
+
+**Solusi**:
+```bash
+# Install PyTorch dulu (versi CPU, lebih kecil)
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# Baru install sentence-transformers
+pip install sentence-transformers
+```
+
+> Jika tetap gagal, pakai `requirements-lite.txt` yang tidak butuh sentence-transformers.
+> Pipeline akan otomatis pakai SimpleEmbedder (kurang akurat tapi tetap jalan).
+
+---
+
+### 4. `ModuleNotFoundError: No module named 'langchain_community'`
+
+**Penyebab**: Ada code dari ChatGPT yang pakai `langchain_community` tapi belum diinstall.
+
+**Solusi**:
+```bash
+pip install langchain-community
+```
+
+> Project ini sendiri TIDAK butuh `langchain_community`. Ini hanya muncul jika kamu
+> copy code dari ChatGPT/internet yang pakai library tersebut.
+
+---
+
+### 5. `Error: [Errno 2] No such file or directory: '.env'` / API Key error
+
+**Penyebab**: File `.env` belum dibuat, atau key salah/expired.
+
+**Solusi**:
+```bash
+# Buat file .env di folder utama project (oop_fastapi/.env)
+# Isinya satu baris:
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> Dapat key gratis di https://console.groq.com/keys
+> Jika tidak mau pakai LLM, ubah di `api/dependencies.py`: `use_llm=False`
+
+---
+
+### 6. `faiss-cpu` gagal install di Windows
+
+**Penyebab**: faiss-cpu tidak punya wheels untuk semua versi Python di Windows.
+
+**Solusi**:
+```bash
+# Opsi 1: Coba install langsung
+pip install faiss-cpu
+
+# Opsi 2: Jika gagal, pakai versi spesifik
+pip install faiss-cpu==1.7.4
+
+# Opsi 3: Jika tetap gagal, install via conda
+conda install -c conda-forge faiss-cpu
+```
+
+---
+
+### 7. `Address already in use` saat jalankan uvicorn
+
+**Penyebab**: Port 8000 sudah dipakai (mungkin uvicorn masih jalan di terminal lain).
+
+**Solusi**:
+```bash
+# Pakai port lain
+uvicorn api.main:app --reload --port 8001
+
+# Atau matikan proses lama (Windows):
+taskkill /F /IM python.exe
+```
+
+---
+
+### 8. `ImportError` saat jalankan `uvicorn api.main:app`
+
+**Penyebab**: Terminal tidak di folder yang benar.
+
+**Solusi**:
+```bash
+# Pastikan kamu di folder ROOT project:
+cd F:\programming\ngajar\dtsense\oop_fastapi
+
+# BUKAN di folder api/ atau src/
+# Lalu jalankan:
+uvicorn api.main:app --reload
+```
+
+---
+
+### 9. Streamlit error `Connection refused` ke FastAPI
+
+**Penyebab**: Backend FastAPI belum jalan.
+
+**Solusi**:
+Kamu butuh **2 terminal** yang berjalan bersamaan:
+```
+Terminal 1: uvicorn api.main:app --reload          ← backend
+Terminal 2: streamlit run frontend/streamlit_app.py  ← frontend
+```
+
+Jangan tutup Terminal 1 saat buka Terminal 2!
+
+---
+
+### 10. `pip install -r requirements.txt` error banyak sekali
+
+**Solusi nuclear (hapus semua, mulai bersih)**:
+```bash
+# 1. Hapus venv lama
+rmdir /s /q venv              # Windows
+rm -rf venv                   # macOS/Linux
+
+# 2. Buat venv baru
+python -m venv venv
+venv\Scripts\activate         # Windows
+
+# 3. Upgrade pip
+python -m pip install --upgrade pip
+
+# 4. Install satu-satu (biar tahu mana yang error)
+pip install fastapi uvicorn pydantic python-dotenv
+pip install numpy pypdf
+pip install faiss-cpu
+pip install langchain-groq langchain-core
+pip install sentence-transformers
+pip install streamlit
+```
+
+---
+
+### 💡 Tips Umum
+
+| Masalah | Cek Ini Dulu |
+|---------|-------------|
+| `No module found` | Sudah aktifkan venv? (`venv\Scripts\activate`) |
+| Install gagal | Python versi berapa? (ketik `python --version`) |
+| Semua error | Coba Python 3.11 — paling stabil & compatible |
+| Masih error | Screenshot error → tanya di grup / ke instruktur |

@@ -1,13 +1,28 @@
 # Dependencies utama project RAG OOP FastAPI
-# Kompatibel dengan Python 3.10 - 3.14
-fastapi>=0.115.0
-uvicorn>=0.30.0
-pydantic>=2.9.0
-faiss-cpu>=1.9.0
-numpy>=1.26.0,<3.0.0
-pypdf>=5.0.0
-streamlit>=1.38.0
-langchain-groq>=0.3.0
-langchain-core>=0.3.0
-python-dotenv>=1.0.0
-sentence-transformers>=3.0.0
+# Kompatibel dengan Python 3.10 - 3.12 (RECOMMENDED: Python 3.11)
+#
+# PENTING: Jika install gagal, coba requirements-lite.txt
+# → pip install -r requirements-lite.txt
+
+# --- Core (WAJIB) ---
+fastapi>=0.115.0,<1.0.0
+uvicorn>=0.30.0,<1.0.0
+pydantic>=2.9.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# --- Data Processing ---
+numpy>=1.26.0,<2.0.0
+pypdf>=5.0.0,<6.0.0
+
+# --- Vector Search ---
+faiss-cpu>=1.7.4,<2.0.0
+
+# --- LLM (Groq) ---
+langchain-groq>=0.3.0,<1.0.0
+langchain-core>=0.3.0,<1.0.0
+
+# --- Embedding (HuggingFace) ---
+sentence-transformers>=3.0.0,<4.0.0
+
+# --- Frontend ---
+streamlit>=1.38.0,<2.0.0

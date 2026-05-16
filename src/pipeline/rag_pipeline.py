@@ -52,7 +52,12 @@ class RAGPipeline:
         if use_simple_embedder:
             self.embedder = SimpleEmbedder(dimension=256)
         else:
-            self.embedder = HuggingFaceEmbedder(model_name=embedding_model)
+            try:
+                self.embedder = HuggingFaceEmbedder(model_name=embedding_model)
+            except (ImportError, Exception):
+                # Fallback jika sentence-transformers tidak terinstall
+                print("[INFO] sentence-transformers tidak tersedia, pakai SimpleEmbedder.")
+                self.embedder = SimpleEmbedder(dimension=256)
 
         # Buat vector store dan retriever
         self.vector_store = FaissVectorStore(embedder=self.embedder)
