@@ -218,8 +218,3 @@ Buka `notebooks/01_oop_rag_fastapi_easy.ipynb` untuk materi interaktif:
 ## 📋 Catatan Penting
 
 - **API Key Groq GRATIS** — daftar di https://console.groq.com
-- **Tidak perlu GPU** — embedding model ringan, bisa di laptop biasa
-- **Tidak perlu Docker** — cukup Python dan pip
-- **Tidak perlu database** — semua disimpan di memori (untuk pembelajaran)
-- Jika tidak punya API key, sistem fallback ke SimpleGenerator (concatenate tanpa LLM)
-- File `.env` TIDAK di-push ke GitHub (sudah ada di `.gitignore`)
